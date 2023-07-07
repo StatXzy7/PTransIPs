@@ -1,7 +1,7 @@
 # PTransIPs
 PTransIPs: Identification of SARS-CoV-2 phosphorylation sites based on protein pretrained model embedding and transformer
 
-## Step1: Generate two pretrained embedding'
+## Step1: Generate two pretrained embedding
 fasta file: Original sequence as input1
 
 Use `pretrained_embedding_generate.py` to generate sequence pretrained embedding as input2
