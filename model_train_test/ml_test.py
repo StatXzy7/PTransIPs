@@ -32,12 +32,6 @@ dl_train_label = torch.tensor(np.array(train.iloc[:,0],dtype='int64')).to(device
 dl_test_label = torch.tensor(np.array(test.iloc[:,0],dtype='int64')).to(device)
 
 
-
-
-
-
-
-
 def save_model(model_dict, best_acc, save_dir, save_prefix):
     if not os.path.isdir(save_dir):
         os.makedirs(save_dir)

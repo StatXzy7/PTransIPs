@@ -89,23 +89,6 @@ def get_dst_model(dst_model_path):
     dst_model.eval()
     return dst_model
 
-
-# def read_fasta( fasta_path, split_char, id_field):
-#     sequences = dict()
-#     with open( fasta_path, 'r' ) as fasta_f:
-#         for line in fasta_f:
-#             # get uniprot ID from header and create new entry
-#             if line.startswith('>'):
-#                 uniprot_id = line.replace('>', '').strip().split(split_char)[id_field]
-#                 # replace tokens that are mis-interpreted when loading h5
-#                 uniprot_id = uniprot_id.replace("/","_").replace(".","_")
-#                 sequences[ uniprot_id ] = ''
-#             else:
-#                 # repl. all whie-space chars and join seqs spanning multiple lines
-#                 sequences[ uniprot_id ] += ''.join( line.split() ).upper()
-
-#     return sequences
-
 def read_fasta(fasta_path, split_char, id_field): #这个函数按照顺序为每个sequence取一个key
     sequences = dict()
     seq_id = 0
