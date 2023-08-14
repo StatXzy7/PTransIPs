@@ -7,7 +7,7 @@ https://arxiv.org/abs/2308.05115
 
 
 
-![flowchart](E:\github projects\PTransIPs\flowchart.png)
+![flowchart](.\flowchart.png)
 
 ## Step1: Generate two pretrained embedding
 fasta file: Original sequence as input1;
