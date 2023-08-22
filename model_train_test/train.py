@@ -4,7 +4,7 @@ import torch.nn.functional as F
 import numpy as np
 import pandas as pd
 import config
-import BERT_model_pretrain_final
+import PTransIPs
 from sklearn.model_selection import KFold, StratifiedShuffleSplit, StratifiedKFold
 import collections
 from torch.utils.data import  DataLoader, TensorDataset
@@ -14,8 +14,6 @@ import os
 import pretrained_embedding_generate
 from pretrained_embedding_generate import embedding_out
 from torch.optim import *
-from torch.optim import AdamW
-from torch.optim.lr_scheduler import StepLR
 torch.backends.cudnn.enabled = True
 torch.backends.cudnn.benchmark=True
 
@@ -65,14 +63,14 @@ def test_eval_str(test,test_embedding,test_str_embedding, test_labels,model):
 def addbatch(data,label,batchsize):
 
     data = TensorDataset(data,label)
-    data_loader = DataLoader(data, batch_size=batchsize, shuffle=True)#shuffle是是否打乱数据集，可自行设置
+    data_loader = DataLoader(data, batch_size=batchsize, shuffle=True)
 
     return data_loader 
 
 def addbatcht(data,embedding,str_embedding, label,batchsize):
 
     data = TensorDataset(data,embedding,str_embedding, label)
-    data_loader = DataLoader(data, batch_size=batchsize, shuffle=True)#shuffle是是否打乱数据集，可自行设置
+    data_loader = DataLoader(data, batch_size=batchsize, shuffle=True)
 
     return data_loader 
 
@@ -121,16 +119,16 @@ def training(fold, model,device,epochs,criterion,optimizer,
             running_loss += loss.item()
         
         acc, val_result = test_eval_str(val,val_embedding,val_str_embedding, val_labels,model)
-        auc =  roc_auc_score(val_labels.cpu().detach().numpy(), val_result[:,1].cpu().detach().numpy()) #使用auc筛选更好
+        auc =  roc_auc_score(val_labels.cpu().detach().numpy(), val_result[:,1].cpu().detach().numpy()) 
         if auc - max_performance > 1e-4 :
             train_num = 0
             print("best_model_save")
-            save_model_test(model.state_dict(), fold, auc, '/root/autodl-tmp/myDNAPredict/program 1.1/dl_model_save12BERT', parameters.learn_name) #内置一个写入的保存
-            # 打开文件，使用"append"模式以追加的方式写入文件
-            with open("/root/autodl-tmp/myDNAPredict/program 1.1/dl_model_save12BERT/save_result.txt", "a") as f:
-                # 将要写入的内容格式化为字符串
+            save_model_test(model.state_dict(), fold, auc, './model', parameters.learn_name) 
+            # Open the file using "append" mode to add content to it
+            with open("./model/save_result.txt", "a") as f:
+                # Format the content to be written as a string
                 result_str = "save model: epoch {} - iteration {}: average loss {:.3f} val_acc {:.3f} val_auc {:.3f} learning rate {:.2e}\n".format(epoch+1, step+1, running_loss,acc,auc, optimizer.param_groups[0]['lr'])
-                # 将字符串写入文件
+                # Write the string to the file
                 f.write(result_str)
             print(result_str, "\n")
             max_performance = auc
@@ -149,9 +147,9 @@ def train_validation(parameters,
     # skf = KFold(n_splits=k_fold,shuffle=True,random_state=15)
     skf = StratifiedShuffleSplit(n_splits=k_fold,random_state=42)
     for fold, (train_idx, val_idx) in enumerate(skf.split(x_train_encoding,train_label.cpu())):
-        model = BERT_model_pretrain_final.BERT(parameters).to(device)
+        model = PTransIPs.BERT(parameters).to(device)
         
-        print('**'*10,'第', fold+1, '折','ing....', '**'*10)
+        print('**'*10,'Fold', fold+1, 'Processing...', '**'*10)
         x_train = x_train_encoding[train_idx]
         x_train_label = train_label[train_idx]
         x_val = x_train_encoding[val_idx]
@@ -217,8 +215,8 @@ if __name__ == "__main__":
     print("Using {}".format(device))
     
     
-    train = pd.read_csv("/root/autodl-tmp/myDNAPredict/program 1.1/data/DeepIPS_Train_data.csv",header=0)
-    test = pd.read_csv("/root/autodl-tmp/myDNAPredict/program 1.1/data/DeepIPS_Test_data.csv",header=0)
+    train = pd.read_csv("data/Y-train.csv",header=0)
+    test = pd.read_csv("data/Y-test.csv",header=0)
     x_train = train.iloc[:,1]
     x_test = test.iloc[:,1]
     train_label = train.iloc[:,0]
@@ -226,10 +224,10 @@ if __name__ == "__main__":
     
     x_train_encoding = BERT_encoding(x_train,x_test).to('cuda')
     x_test_encoding = BERT_encoding(x_test,x_train).to('cuda')
-    x_train_embedding = torch.tensor(np.load('/root/autodl-tmp/myDNAPredict/program 1.1/data/x_train_embedding.npy')).to('cuda')
-    x_test_embedding = torch.tensor(np.load('/root/autodl-tmp/myDNAPredict/program 1.1/data/x_test_embedding.npy')).to('cuda')
-    x_train_str_embedding = torch.tensor(np.load('/root/autodl-tmp/myDNAPredict/program 1.1/data/train_str_embedding.npy')).to('cuda')
-    x_test_str_embedding = torch.tensor(np.load('/root/autodl-tmp/myDNAPredict/program 1.1/data/test_str_embedding.npy')).to('cuda')   
+    x_train_embedding = torch.tensor(np.load('data/Y_train_embedding.npy')).to('cuda')
+    x_test_embedding = torch.tensor(np.load('data/Y_test_embedding.npy')).to('cuda')
+    x_train_str_embedding = torch.tensor(np.load('data/Y_train_str_embedding.npy')).to('cuda')
+    x_test_str_embedding = torch.tensor(np.load('data/Y_test_str_embedding.npy')).to('cuda')   
     
     train_label = torch.tensor(np.array(train_label,dtype='int64')).to('cuda')
     test_label = torch.tensor(np.array(test_label,dtype='int64')).to('cuda')

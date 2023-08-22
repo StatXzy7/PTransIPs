@@ -11,10 +11,6 @@ import torch.nn as nn
 import numpy as np
 import config
 
-# import pickle
-# from util import util_freeze
-# # from protlearn.features import aac
-# from collections import Counter
 config = config.get_train_config()
 
 def get_attn_pad_mask(seq):
