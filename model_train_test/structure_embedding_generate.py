@@ -5,8 +5,8 @@
 ##################################
 
 ####
-# 使用这一代码之前应当先git clone EMBER2项目，
-# 然后将本文件移动至EMBER2文件夹以使用该模型获取当前序列的预测结构
+# Before using this code, first git clone the EMBER2 project,
+# and then move this file into the EMBER2 folder to use the model for obtaining predicted structures for the current sequence.
 ####
 
 import argparse
@@ -89,7 +89,7 @@ def get_dst_model(dst_model_path):
     dst_model.eval()
     return dst_model
 
-def read_fasta(fasta_path, split_char, id_field): #这个函数按照顺序为每个sequence取一个key
+def read_fasta(fasta_path, split_char, id_field): 
     sequences = dict()
     seq_id = 0
     with open(fasta_path, 'r') as fasta_f:
@@ -244,9 +244,9 @@ def mainStr():
     kernel = kernel.astype(np.float32)
     kernel = torch.from_numpy(kernel).to(device)
 
-    ## 这里事先定义一下需要保存的内容embedding的变量，因为有循环
+    ## Predefine the variable for storing embeddings here, as there's a loop later on
     num_keys = len(seq_dict.keys())
-    # str_embedding = torch.zeros((num_keys, 33, 33), device=device)#这里33就是prot_len，但是我们需要事先定义数组，所以没办法
+    # str_embedding = torch.zeros((num_keys, 33, 33), device=device) # Here, 33 is the prot_len, but we need to predefine the array, so there's no other option
     str_embedding = np.zeros((num_keys, 33, 132))
 
     for idx,identifier in enumerate(seq_dict.keys()):

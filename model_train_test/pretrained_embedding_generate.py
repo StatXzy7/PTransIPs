@@ -1,7 +1,5 @@
 from transformers import T5EncoderModel, T5Tokenizer
 import torch
-import h5py
-import time
 import numpy as np
 import pandas as pd
 
@@ -137,57 +135,61 @@ def embedding_out(train_data,test_data,per_residue,max_residues=400, max_seq_len
 
 if __name__ == "__main__":
     print("Using {}".format(device))
-    # test_path = "./protT5/test.fasta"
-    # train = pd.read_csv(r"C:\Users\tianchilu4\Desktop\project1.1\data\neoantigen_train.csv",header=0)
-    # train = pd.read_csv('../data/train_val2.csv',header=0)
-    # train = pd.read_csv('../data/1DATA.csv',header=0)
     
-    # train = pd.read_csv('program 1.1/data/DeepIPS_Train_data.csv',header=0)
-    # # train = pd.read_csv('../data/TCR_state_train_data.csv',header=0)
-    # # train = pd.read_csv('../data/TCR_positive.csv',header=0)
-    # # x_train_positive = train[train.apply(lambda x: x.iloc[1]==1,axis=1)].iloc[:,0]
-    # # x_train_negative = train[train.apply(lambda x : x.iloc[1]==0,axis=1)].iloc[:,0]
-    
-    # x_train = train.iloc[:,1]
-    # longest = pd.DataFrame([max(x_train, key = len)]).iloc[:,0]
-    # x_train = x_train.append(longest).reset_index(drop=True)
-    
-    # # x_train = x_train.drop_duplicates(keep='first')reset_index()
-    # # x_train = x_train['Epitope']
-    
-    # per_residue = True 
-    # embedding = embedding_out(x_train,x_train,per_residue)
-    # embedding = np.delete(embedding,-1,axis=0)
-    
-    # positive_embedding = embedding_out(x_train_positive,x_train_positive,per_residue)
-    # negative_embedding = embedding_out(x_train_negative,x_train_negative,per_residue)
-    # np.save('IEDB_HLA_embedding_positive.npy',positive_embedding)
-    # np.save('IEDB_HLA_embedding_negative.npy',negative_embedding)
-    # np.save('CEDAR_IEDB_embedding.npy',embedding)
-    
-    # np.save('embedding.npy',embedding)
-    # embedding = embeddings(x_train,x_train,per_residue)
-    
-
-    train = pd.read_csv("/root/myDNAPredict/program 1.1/data/DeepIPS_Train_data.csv",header=0)
-    test = pd.read_csv("/root/myDNAPredict/program 1.1/data/DeepIPS_Test_data.csv",header=0)
+    # IF dataset = S/T
+    train = pd.read_csv("./data/ST-train.csv",header=0)
+    test = pd.read_csv("./data/ST-train.csv",header=0)
     x_train = train.iloc[:,1]
     x_test = test.iloc[:,1]
     train_label = train.iloc[:,0]
     test_label = test.iloc[:,0]
+     
+    # # IF dataset = Y
+    # train = pd.read_csv("./data/Y-train.csv",header=0)
+    # test = pd.read_csv("./data/Y-test.csv",header=0)
+    # x_train = train.iloc[:,1]
+    # x_test = test.iloc[:,1]
+    # train_label = train.iloc[:,0]
+    # test_label = test.iloc[:,0]
     
-    longest_train = pd.DataFrame([max(x_train, key = len)]).iloc[:,0]
-    x_train = x_train.append(longest_train).reset_index(drop=True)
-    longest_test = pd.DataFrame([max(x_test, key = len)]).iloc[:,0]
-    x_test = x_test.append(longest_test).reset_index(drop=True)
+    data = pd.concat([x_train, x_test])
+    labels = pd.concat([train_label, test_label])   
+
+    print("x_train.shape= ", x_train.shape)
+    print("x_test.shape= ", x_test.shape)
+    print("train_label.shape= ", train_label.shape)
+    print("test_label.shape= ", test_label.shape)
+    print("data.shape= ", data.shape)
+    print("labels.shape= ", labels.shape)
+    
+    def check_missing_values(df):
+        if df.isnull().values.any():
+            print("The DataFrame has missing values.")
+        else:
+            print("The DataFrame doesn't have any missing values.")
+
+    # Check for missing values in train, test, data, and labels
+    check_missing_values(train)
+    check_missing_values(test)
+    check_missing_values(data)
+    check_missing_values(labels)
+    
+    # data = data.fillna("")
+    
+    longest = pd.DataFrame([max(data, key = len)]).iloc[:,0]
+    print("longest sequence= ", longest)
+    data = data.append(longest).reset_index(drop=True)
     
     per_residue = True 
-    # embedding = embedding_out(x_train,x_train,per_residue)
-    # embedding = np.delete(embedding,-1,axis=0)
-    x_train_encoding = embedding_out(x_train,x_train,per_residue)
-    x_train_encoding = np.delete(x_train_encoding,-1,axis=0)
-    x_test_encoding = embedding_out(x_test,x_test,per_residue)
-    x_test_encoding = np.delete(x_test_encoding,-1,axis=0)
+    data = embedding_out(data,data,per_residue)
+    data = np.delete(data,-1,axis=0)
+    print("x_train_encoding.shape",data.shape)
 
-    np.save('/root/autodl-tmp/x_train_embedding.npy',x_train_encoding)
-    np.save('/root/autodl-tmp/x_test_embedding.npy',x_test_encoding)
+    x_train_encoding = data[:len(x_train),:,:]
+    x_test_encoding = data[len(x_train):,:,:]
+    
+    print("x_train_encoding.shape",x_train_encoding.shape)
+    print("x_test_encoding.shape",x_test_encoding.shape)
+
+    np.save('./embeddings/x_train_embedding.npy',x_train_encoding)
+    np.save('./embeddings/x_test_embedding.npy',x_test_encoding)
