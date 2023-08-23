@@ -4,7 +4,7 @@ import torch.nn.functional as F
 import numpy as np
 import pandas as pd
 import config
-import PTransIPs
+import PTransIPs_model
 from sklearn.model_selection import KFold, StratifiedShuffleSplit, StratifiedKFold
 import collections
 from torch.utils.data import  DataLoader, TensorDataset
@@ -31,7 +31,7 @@ def get_val_loss(logits, label, criterion):
     loss = criterion(logits.view(-1, parameters.num_class), label.view(-1))
     loss = (loss.float()).mean()
     loss = (loss - parameters.alpha).abs() + parameters.alpha
-    logits = F.softmax(logits, dim=1)  # softmax归一化
+    logits = F.softmax(logits, dim=1)  # softmax
   
 
     sum_loss = loss+get_entropy(logits)-get_cond_entropy(logits)
@@ -77,7 +77,7 @@ def addbatcht(data,embedding,str_embedding, label,batchsize):
 
 
 
-def save_model_test(model_dict, fold, test_auc, save_dir, save_prefix):
+def save_model_test(model_dict, fold, auc, save_dir, save_prefix):
     if not os.path.isdir(save_dir):
         os.makedirs(save_dir)
     # filename = 'test_AUC[{:.3f}], {}.pt'.format(test_auc, save_prefix)
@@ -85,17 +85,16 @@ def save_model_test(model_dict, fold, test_auc, save_dir, save_prefix):
     save_path_pt = os.path.join(save_dir, filename)
     print('save_path_pt',save_path_pt)
     torch.save(model_dict, save_path_pt, _use_new_zipfile_serialization=False)
-    print('Save Model Over: {}, test_AUC: {:.3f}\n'.format(save_prefix, test_auc))
+    print('Save Model Over: {}, AUC: {:.3f}\n'.format(save_prefix, auc))
 
     
 
 def training(fold, model,device,epochs,criterion,optimizer,
              traindata,
-             val,val_embedding,val_str_embedding, val_labels):
+             val,val_embedding,val_str_embedding, val_labels, scheduler):
     
     running_loss = 0
     max_performance = 0
-    train_num = 50
     ReduceLR = False
     model.train()
     for epoch in range(epochs):
@@ -114,18 +113,16 @@ def training(fold, model,device,epochs,criterion,optimizer,
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-            train_num += 1
             
             running_loss += loss.item()
         
         acc, val_result = test_eval_str(val,val_embedding,val_str_embedding, val_labels,model)
         auc =  roc_auc_score(val_labels.cpu().detach().numpy(), val_result[:,1].cpu().detach().numpy()) 
-        if auc - max_performance > 1e-4 :
-            train_num = 0
+        if auc - max_performance > 1e-4 and epoch > 50 :
             print("best_model_save")
-            save_model_test(model.state_dict(), fold, auc, './model', parameters.learn_name) 
+            save_model_test(model.state_dict(), fold, auc, './model/Y_train', parameters.learn_name) 
             # Open the file using "append" mode to add content to it
-            with open("./model/save_result.txt", "a") as f:
+            with open("./model/Y_train/save_result.txt", "a") as f:
                 # Format the content to be written as a string
                 result_str = "save model: epoch {} - iteration {}: average loss {:.3f} val_acc {:.3f} val_auc {:.3f} learning rate {:.2e}\n".format(epoch+1, step+1, running_loss,acc,auc, optimizer.param_groups[0]['lr'])
                 # Write the string to the file
@@ -134,10 +131,11 @@ def training(fold, model,device,epochs,criterion,optimizer,
             max_performance = auc
             # if epoch >= warmup_steps:
             optimizer.param_groups[0]['lr'] = optimizer.param_groups[0]['lr'] * 0.2
-        print("epoch {} - iteration {}: average loss {:.3f} val_acc {:.3f} val_auc {:.3f} learning rate {:.2e}".format(epoch+1, step+1, running_loss,acc,auc, optimizer.param_groups[0]['lr']))
+        if epoch%5 == 0:
+            print("epoch {} - iteration {}: average loss {:.3f} val_acc {:.3f} val_auc {:.3f} learning rate {:.2e}".format(epoch+1, step+1, running_loss,acc,auc, optimizer.param_groups[0]['lr']))
         running_loss=0
-        if ReduceLR:
-            scheduler.step(auc)
+        # if ReduceLR:
+        #     scheduler.step(auc)
                
 
 
@@ -147,7 +145,7 @@ def train_validation(parameters,
     # skf = KFold(n_splits=k_fold,shuffle=True,random_state=15)
     skf = StratifiedShuffleSplit(n_splits=k_fold,random_state=42)
     for fold, (train_idx, val_idx) in enumerate(skf.split(x_train_encoding,train_label.cpu())):
-        model = PTransIPs.BERT(parameters).to(device)
+        model = PTransIPs_model.BERT(parameters).to(device)
         
         print('**'*10,'Fold', fold+1, 'Processing...', '**'*10)
         x_train = x_train_encoding[train_idx]
@@ -169,7 +167,7 @@ def train_validation(parameters,
         # scheduler = StepLR(optimizer, step_size=5, gamma=0.1)
         training(fold,model,device,epochs,criterion,optimizer,
                  train_data_loader,
-                 x_val,x_val_embedding,x_val_str_embedding, x_val_label)    
+                 x_val,x_val_embedding,x_val_str_embedding, x_val_label, warmup_scheduler)    
         
 
 def BERT_encoding(txt_array,test_array):
@@ -243,7 +241,7 @@ if __name__ == "__main__":
     warmup_steps = 5
     train_validation(parameters,
                      x_train_encoding,x_train_embedding,x_train_str_embedding,train_label,
-                     device,20,criterion,9,5e-5,18) #New Hyperparameter
+                     device,100,criterion,5,1e-4,15) #New Hyperparameter
     # train_validation(parameters,x_train_encoding,train_label,device,50,criterion,10,0.0001,64)
     #training(model,device,100,criterion,optimizer,traindata,x_test_encoding,test_label)
     

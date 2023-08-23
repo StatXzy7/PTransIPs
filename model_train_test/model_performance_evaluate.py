@@ -12,8 +12,8 @@ from sklearn.metrics import roc_curve,roc_auc_score
 from sklearn.metrics import precision_recall_curve,average_precision_score, recall_score
 from sklearn.metrics import confusion_matrix, matthews_corrcoef
 
-from BERT_model_pretrain_final import *
-from bert_train_pretrain_final import BERT_encoding
+from PTransIPs_model import *
+from train import BERT_encoding
 
 from Algorithm_eval_function import LR_eval,LR_L2_eval,Linear_SVM_eval,Kernel_SVM_eval,RF_eval,DL_eval,BERT_eval,preBERT_eval
 import pickle
@@ -38,19 +38,19 @@ BERT_model = BERT(cf)
 # -------------------------------------------------------
 
 # ----------------- For Y data set ----------------------
-train = pd.read_csv("/root/autodl-tmp/myDNAPredict/program 1.1/data/Y-train.csv",header=0)
-test = pd.read_csv("/root/autodl-tmp/myDNAPredict/program 1.1/data/Y-test.csv",header=0)
+train = pd.read_csv("./data/Y-train.csv",header=0)
+test = pd.read_csv("./data/Y-test.csv",header=0)
 train_seq = train.iloc[:,1]
 test_seq = test.iloc[:,1]
 test_label = torch.tensor(np.array(test.iloc[:,0],dtype='int64')).to(device) # Very important
 train_encoding = BERT_encoding(train_seq,test_seq)
 test_encoding = BERT_encoding(test_seq,train_seq)
-test_embedding = torch.tensor(np.load('/root/autodl-tmp/myDNAPredict/program 1.1/data/Y_test_embedding.npy')).to(device)
-test_str_embedding = torch.tensor(np.load('/root/autodl-tmp/myDNAPredict/program 1.1/data/Y_test_str_embedding.npy')).to(device)
+test_embedding = torch.tensor(np.load('./data/Y_test_embedding.npy')).to(device)
+test_str_embedding = torch.tensor(np.load('./data/Y_test_str_embedding.npy')).to(device)
 # ------------------------------------------------------
 
 # Please modify the file path here!
-path = '/root/autodl-tmp/myDNAPredict/program 1.1/dl_model_ST'
+path = './model/Y'
 
 # Get all file names in the directory
 files = os.listdir(path)

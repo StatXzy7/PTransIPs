@@ -54,12 +54,22 @@ Details in this part please refer to **[EMBER2](https://github.com/kWeissenow/EM
 
 ### Step2: Training Model
 
-Use `bert_train_pretrain_final.py` to train the PTransIPs model.
+Use `train.py` to train the PTransIPs model in `PTransIPs_model.py`.
+
+```bash
+$ python model_train_test/train.py
+```
 
 
 
 ### Step3: Evaluate the model performance on independent testset
 Use `model_performance _evaluate.py.py` to evaluate the model performance on independent testset.
+
+```bash
+$ python model_train_test/model_performance _evaluate.py.py
+```
+
+
 
 ### Step4: Other analysis
 Use `umap.py` to generate umap visualization.
