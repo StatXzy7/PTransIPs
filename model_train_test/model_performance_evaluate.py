@@ -98,7 +98,7 @@ for f in pt_files:
     result_str = 'Model file name: {}  Accuracy: {:.4f} SEN: {:.4f} SPEC: {:.4f} MCC: {:.4f} AUC: {:.4f}\n'.format(f, BERT_test_acc, BERT_sen, BERT_spec, BERT_mcc, BERT_test_auc)
     print(result_str)
 
-    with open(os.path.join(path, 'text_result.txt'), "a") as f:
+    with open(os.path.join(path, 'PTransIPs_text_result.txt'), "a") as f:
         f.write(result_str)
 
 # Compute mean of Result and Result_softmax
@@ -129,7 +129,7 @@ BERT_test_auc = roc_auc_score(test_label, BERT_test_prob[:,1])
 result_str = 'All kfold Model file:  Accuracy: {:.4f} SEN: {:.4f} SPEC: {:.4f} MCC: {:.4f} AUC: {:.4f}\n'.format(BERT_test_acc, BERT_sen, BERT_spec, BERT_mcc, BERT_test_auc)
 print(result_str)
 
-with open(os.path.join(path, 'text_result.txt'), "a") as f:
+with open(os.path.join(path, 'PTransIPs_text_result.txt'), "a") as f:
     f.write(result_str)
 
-np.save(os.path.join(path, 'BERT_test_prob.npy'), BERT_test_prob)
+np.save(os.path.join(path, 'PTransIPs_test_prob.npy'), BERT_test_prob)

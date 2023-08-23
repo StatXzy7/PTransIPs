@@ -11,17 +11,16 @@ import torch.nn.functional as F
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier as RF
 from sklearn import svm
-from ml_config import *
 
 
 def data_read():
-    train = pd.read_csv('/root/autodl-tmp/myDNAPredict/program 1.1/data/DeepIPS_Train_data.csv',header=0)
-    test = pd.read_csv('/root/autodl-tmp/myDNAPredict/program 1.1/data/DeepIPS_Test_data.csv',header=0)
+    train = pd.read_csv('./data/ST-train.csv',header=0)
+    test = pd.read_csv('./data/ST-test.csv',header=0)
     return train,test
 
 def data_readY():
-    train = pd.read_csv('/root/autodl-tmp/myDNAPredict/program 1.1/data/Y-train.csv',header=0)
-    test = pd.read_csv('/root/autodl-tmp/myDNAPredict/program 1.1/data/Y-test.csv',header=0)
+    train = pd.read_csv('./data/Y-train.csv',header=0)
+    test = pd.read_csv('./data/Y-test.csv',header=0)
     return train,test
 
 

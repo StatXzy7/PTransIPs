@@ -1,0 +1,2 @@
+Model file name: ./model/Y/Y_model.pt  Accuracy: 92.8571 SEN: 0.9048 SPEC: 0.9524 MCC: 0.8581 AUC: 0.9683
+All kfold Model file:  Accuracy: 92.8571 SEN: 0.9048 SPEC: 0.9524 MCC: 0.8581 AUC: 0.9683

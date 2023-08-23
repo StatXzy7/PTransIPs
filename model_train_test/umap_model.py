@@ -1,5 +1,7 @@
 # ---encoding:utf-8---
 
+#This code is used for umap ,so the output of model is some parameters.
+
 import os,sys 
 parentdir = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) 
 sys.path.insert(0,parentdir) 
@@ -11,6 +13,10 @@ import torch.nn as nn
 import numpy as np
 import config
 
+# import pickle
+# from util import util_freeze
+# # from protlearn.features import aac
+# from collections import Counter
 config = config.get_train_config()
 
 def get_attn_pad_mask(seq):
@@ -208,28 +214,24 @@ class BERT(nn.Module):
         str_embedding = output_data.permute(0, 2, 1)
         # print(str_embedding.shape)  # Should be torch.Size([64, 33, 256])
 
-        x_embedding = x_embedding.permute(0, 2, 1) # input to cnn (batch_size, in_channels, seq_length)
+        x_embedding = x_embedding.permute(0, 2, 1) 
         x_embedding = self.conv1dEmbed(x_embedding)
         x_embedding = x_embedding.permute(0, 2, 1)  #[64,33,1024] 33->37  [64,37,1024]
         # print("x_embedding_conv.shape=",x_embedding.shape) 
 
 
         
-        # Transformer
+        #Transformer
+
         self_embedding = self.embedding(input_ids)  # [bach_size, seq_len, d_model = dim_embedding] [64,33,1024]
-        # print("self_embedding.shape", self_embedding.shape)
-        # print("self_embedding.type", self_embedding.dtype)
-        
-        # all_input = self_embedding + x_embedding
+
         all_input = torch.cat((self_embedding + x_embedding , str_embedding), dim=2) # [64,33,1156]
         # print("all_input.shape", all_input.shape)
         
         enc_self_attn_mask = get_attn_pad_mask(input_ids)  # [batch_size, maxlen, maxlen]
         for layer in self.layers:
             output_t = layer(all_input, enc_self_attn_mask)  # 64,37,1156
-        # print("output.shape=",output.shape)  
-        
-        # CNN
+
         output_c = self.resconv1d((all_input).permute(0, 2, 1))
         output_c = output_c.permute(0, 2, 1)
         
@@ -245,7 +247,7 @@ class BERT(nn.Module):
         logits_clsf = self.classifier(reduction_feature)
         # representation = reduction_feature
         # print("reduction_feature.shape0",representation.shape)
-        return logits_clsf,representation
+        return input_ids, self_embedding, x_embedding, str_embedding, representation, logits_clsf
 
 
 
