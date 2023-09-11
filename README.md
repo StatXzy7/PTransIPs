@@ -14,8 +14,8 @@ PTransIPs: Identification of SARS-CoV-2 phosphorylation sites based on protein p
 
 ### Step1: Generate two pretrained embedding
 
-(**Optional**, there are complete embeddings for Y sites in the data folder.)
-
+(**Optional**, there are complete embeddings for Y sites in the data folder. Or you can download the complete embeddings below)
+[**Download all the PTransIPs pretrained embeddings**](https://1drv.ms/f/s!AqzWnkSOWHpvhxMUDCjM9KFpz50O?e=N23jEn)
 
 
 #### Input1: Sequence
