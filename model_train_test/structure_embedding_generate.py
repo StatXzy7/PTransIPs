@@ -353,7 +353,7 @@ def mainStr():
         # np.save("{}/contact_map.npy".format(sample_path), contact_map)
         # np.save("{}/stddev.npy".format(sample_path), stddev)
     
-    # Here is the name of output file
+    # Remember to modify the output according to your input!
     # np.save("{}/Y_train_str_embedding.npy".format(sample_path), str_embedding)
     np.save("{}/Y_test_str_embedding.npy".format(sample_path), str_embedding)
     

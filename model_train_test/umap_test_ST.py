@@ -35,12 +35,13 @@ train_label = torch.tensor(np.array(train.iloc[:,0],dtype='int64')).to(device)
 test_label = torch.tensor(np.array(test.iloc[:,0],dtype='int64')).to(device) #Important
 train_encoding = BERT_encoding(train_seq,test_seq)
 test_encoding = BERT_encoding(test_seq,train_seq)
-train_embedding = torch.tensor(np.load('./data/x_train_embedding.npy')).to(device)
-test_embedding = torch.tensor(np.load('./data/x_test_embedding.npy')).to(device)
-train_str_embedding = torch.tensor(np.load('./data/train_str_embedding.npy')).to(device)
-test_str_embedding = torch.tensor(np.load('./data/test_str_embedding.npy')).to(device) 
+train_embedding = torch.tensor(np.load('./embedding/x_train_embedding.npy')).to(device)
+test_embedding = torch.tensor(np.load('./embedding/x_test_embedding.npy')).to(device)
+train_str_embedding = torch.tensor(np.load('./embedding/train_str_embedding.npy')).to(device)
+test_str_embedding = torch.tensor(np.load('./embedding/test_str_embedding.npy')).to(device) 
 
 path = './model/ST'
+#-------------------Please change the file path here to fit your model---------------
 pt_file = './model/ST/ST_model.pt'
 
 print("model loading......")

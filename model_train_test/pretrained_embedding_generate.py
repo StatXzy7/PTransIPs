@@ -2,6 +2,7 @@ from transformers import T5EncoderModel, T5Tokenizer
 import torch
 import numpy as np
 import pandas as pd
+from ml_set import *
 
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
@@ -135,23 +136,20 @@ def embedding_out(train_data,test_data,per_residue,max_residues=400, max_seq_len
 
 if __name__ == "__main__":
     print("Using {}".format(device))
-    
-    # IF dataset = S/T
-    train = pd.read_csv("./data/ST-train.csv",header=0)
-    test = pd.read_csv("./data/ST-train.csv",header=0)
+
+    # ----------------- For S/T dataset ---------------------
+    # train,test = data_read()
+    # ------------------------------------------------------
+
+    # ----------------- For Y dataset ----------------------
+    train,test = data_readY()
+    # ------------------------------------------------------
+
     x_train = train.iloc[:,1]
     x_test = test.iloc[:,1]
     train_label = train.iloc[:,0]
     test_label = test.iloc[:,0]
-     
-    # # IF dataset = Y
-    # train = pd.read_csv("./data/Y-train.csv",header=0)
-    # test = pd.read_csv("./data/Y-test.csv",header=0)
-    # x_train = train.iloc[:,1]
-    # x_test = test.iloc[:,1]
-    # train_label = train.iloc[:,0]
-    # test_label = test.iloc[:,0]
-    
+
     data = pd.concat([x_train, x_test])
     labels = pd.concat([train_label, test_label])   
 
@@ -183,13 +181,20 @@ if __name__ == "__main__":
     per_residue = True 
     data = embedding_out(data,data,per_residue)
     data = np.delete(data,-1,axis=0)
-    print("x_train_encoding.shape",data.shape)
+    print("train_encoding.shape",data.shape)
 
     x_train_encoding = data[:len(x_train),:,:]
     x_test_encoding = data[len(x_train):,:,:]
     
-    print("x_train_encoding.shape",x_train_encoding.shape)
-    print("x_test_encoding.shape",x_test_encoding.shape)
+    print("train_encoding.shape",x_train_encoding.shape)
+    print("test_encoding.shape",x_test_encoding.shape)
 
-    np.save('./embeddings/x_train_embedding.npy',x_train_encoding)
-    np.save('./embeddings/x_test_embedding.npy',x_test_encoding)
+    # ----------------- For S/T dataset ---------------------
+    # np.save('./embedding/ST_train_embedding.npy',x_train_encoding)
+    # np.save('./embedding/ST_test_embedding.npy',x_test_encoding)    
+    # ------------------------------------------------------
+
+    # ----------------- For Y dataset ----------------------
+    np.save('./embedding/Y_train_embedding.npy',x_train_encoding)
+    np.save('./embedding/Y_test_embedding.npy',x_test_encoding)    
+    # ------------------------------------------------------

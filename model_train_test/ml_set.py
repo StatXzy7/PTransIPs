@@ -23,6 +23,25 @@ def data_readY():
     test = pd.read_csv('./data/Y-test.csv',header=0)
     return train,test
 
+def embedding_load():
+    x_train_embedding = torch.tensor(np.load('./embedding/ST_train_embedding.npy')).to('cuda')
+    x_test_embedding = torch.tensor(np.load('./embedding/ST_test_embedding.npy')).to('cuda')
+    return  x_train_embedding,x_test_embedding
+def embedding_str_load():
+    x_train_str_embedding = torch.tensor(np.load('./embedding/ST_train_str_embedding.npy')).to('cuda')
+    x_test_str_embedding = torch.tensor(np.load('./embedding/ST_test_str_embedding.npy')).to('cuda') 
+    return  x_train_str_embedding,x_test_str_embedding
+
+def embedding_loadY():
+    x_train_embedding = torch.tensor(np.load('./embedding/Y_train_embedding.npy')).to('cuda')
+    x_test_embedding = torch.tensor(np.load('./embedding/Y_test_embedding.npy')).to('cuda')
+    return  x_train_embedding,x_test_embedding
+
+def embedding_str_loadY():
+    x_train_str_embedding = torch.tensor(np.load('./embedding/Y_train_str_embedding.npy')).to('cuda')
+    x_test_str_embedding = torch.tensor(np.load('./embedding/Y_test_str_embedding.npy')).to('cuda') 
+    return  x_train_str_embedding,x_test_str_embedding
+
 
 
 def encoding(txt_array,test_array):

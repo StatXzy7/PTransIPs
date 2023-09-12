@@ -4,96 +4,104 @@ PTransIPs: Identification of SARS-CoV-2 phosphorylation sites based on protein p
 
 
 
-## Approach
+## Architecture
 
 ![flowchart](flowchart.png)
 
-## Usage
+## Table of Contents
+
+- [Step1: Generate two pretrained embedding](#step1-generate-two-pretrained-embedding)
+    * [Input1: Sequence](#input1-sequence)
+    * [Input2: Sequence pretrained embedding](#input2-sequence-pretrained-embedding)
+    * [Input3: Structure pretrained embedding](#input3-structure-pretrained-embedding)
+- [Step2: Training PTransIPs Model](#step2-training-ptransips-model)
+- [Step3: Evaluate the model performance on independent testset](#step3-evaluate-the-model-performance-on-independent-testset)
+- [Step4: Other Visual analysis](#step4-other-visual-analysis)
+
+## Step1: Generate two pretrained embedding
+
+(**For ones that wish to skip this step:** We have already uploaded complete embeddings for Y sites in the data folder `./embedding/`. For S/T sites, you may download complete embeddings from [**All PTransIPs pretrained embeddings**](https://1drv.ms/f/s!AqzWnkSOWHpvhxMUDCjM9KFpz50O?e=N23jEn) and place them under the directory`./embedding/`)
 
 
-
-### Step1: Generate two pretrained embedding
-
-(**Optional**, there are complete embeddings for Y sites in the data folder. Or you can download the complete embeddings below)
-[**Download all the PTransIPs pretrained embeddings**](https://1drv.ms/f/s!AqzWnkSOWHpvhxMUDCjM9KFpz50O?e=N23jEn)
-
-
-#### Input1: Sequence
+### Input1: Sequence
 
 fasta/csv sequence file
 
-#### Input2: Sequence pretrained embedding
+### Input2: Sequence pretrained embedding
 
-To generate the sequence pretrained embedding, use `pretrained_embedding_generate.py` to do the following steps:
+To generate sequence pretrained embedding, run `./model_train_test/pretrained_embedding_generate.py` directly:
 
 ```bash
-$ !pip install torch transformers sentencepiece h5py
-$ python model_train_test/pretrained_embedding_generate.py
+python model_train_test/pretrained_embedding_generate.py
 ```
 
-For detailed guide in this part, please refer to **[ProtTrans](https://github.com/agemagician/ProtTrans)**.
+You may also refer to **[ProtTrans](https://github.com/agemagician/ProtTrans)** for detailed explanations.
 
-#### Input3: Structure pretrained embedding
+### Input3: Structure pretrained embedding
 
-First git clone the `EMBER2` project, and then move the file `pretrained_embedding_generate.py` into the `EMBER2` folder to use the model for generating the predicted structures for the current sequence.
-
-To generate the sequence pretrained embedding, use `pretrained_embedding_generate.py` to do the following steps:
+Firstly, git clone the `EMBER2` project. After moving the file `./model_train_test/pretrained_embedding_generate.py` into the `EMBER2` folder, you may run the model to generate structure embeddding:
 
 ```bash
-$ git clone https://github.com/kWeissenow/EMBER2.git
-$ cp model_train_test/structure_embedding_generate.py EMBER2/
-$ python EMBER2/structure_embedding_generate.py -i "data/Y-train.fa" -o "EMBER2/output"
-$ python EMBER2/structure_embedding_generate.py -i "data/Y-test.fa" -o "EMBER2/output"
+git clone https://github.com/kWeissenow/EMBER2.git
+cp model_train_test/structure_embedding_generate.py EMBER2/
+python EMBER2/structure_embedding_generate.py -i "data/Y-train.fa" -o "EMBER2/output"
+python EMBER2/structure_embedding_generate.py -i "data/Y-test.fa" -o "EMBER2/output"
+```
+**Here, `structure_embedding_generate.py` is set to train Y sites as default, if you attempt to train S/T sites, you may run as follows after modify the codes by commenting Y sites' part and uncommenting S/T sites' part!**
+
+```bash
+python EMBER2/structure_embedding_generate.py -i "data/ST-train.fa" -o "EMBER2/output"
+python EMBER2/structure_embedding_generate.py -i "data/ST-test.fa" -o "EMBER2/output"
 ```
 
-For detailed guide in this part, please refer to **[EMBER2](https://github.com/kWeissenow/EMBER2)**.
+You may also refer to **[EMBER2](https://github.com/kWeissenow/EMBER2)** for detailed explanations.
 
 
 
-### Step2: Training PTransIPs Model
+## Step2: Training PTransIPs Model
 
-**You can proceed directly to this step**, as the requisite pretrained embeddings of dataset (Y sites) have been uploaded to GitHub.
+(**For ones that wish to skip this step:** you may [**Download the PTransIPs model**](https://1drv.ms/f/s!AqzWnkSOWHpvhxMUDCjM9KFpz50O?e=N23jEn) directly. Remember to place them under `.\model\Y_train` or `.\model\ST_train` so that you can proceed to the evaluation step directly.)
 
-Run `train.py` to train the PTransIPs model in `PTransIPs_model.py`.
+Run `./model_train_test/train.py` to train the PTransIPs model in `./model_train_test/PTransIPs_model.py`:
+
+(**Note that `train.py` is set to train Y sites as default, if you attempt to train S/T sites, you'll have to modify the codes by commenting Y sites' part and uncommenting S/T sites' part!**)
 
 ```bash
-$ python model_train_test/train.py
+python model_train_test/train.py
 ```
 
 
 
-### Step3: Evaluate the model performance on independent testset
+## Step3: Evaluate the model performance on independent testset
 
-[**Download the PTransIPs model**](https://1drv.ms/f/s!AqzWnkSOWHpvhxMUDCjM9KFpz50O?e=N23jEn)
+Run `./model_train_test/model_performance _evaluate.py` to evaluate the model performance on independent testset.
 
-**You can proceed directly to this step**, if you have downloaded the models and put it into the `PTransIPs` folder
-
-Run `model_performance _evaluate.py` to evaluate the model performance on independent testset.
+(**Still, `model_performance _evaluate.py` is set to evaluate the model trained on Y sites as default, if you attempt to evaluatet that of S/T sites, you can run as follows after modify the codes by commenting Y sites' part and uncommenting S/T sites' part!**)
 
 ```bash
-$ python model_train_test/model_performance_evaluate.py
+python model_train_test/model_performance_evaluate.py
 ```
 
-This function will create files `PTransIPs_test_prob.npy` and `PTransIPs_text_result.txt`, represent the prediction probability and performance of PTransIPs, respectively.
+Files `path/PTransIPs_test_prob.npy` and `path/PTransIPs_text_result.txt` will be created, representing the prediction probability and performance of PTransIPs, respectively. (where `path/` depends on which sites you choose`)
 
 
 
-### Step4: Other Visual analysis
+## Step4: Other Visual analysis
 
-**You can proceed directly to this step**, if you have downloaded the models and put it into the `PTransIPs` folder
+**You can see the results directly in the files uploaded, in the directory `figures/umap_pdf`**.
 
-**You can also see the results directly in the GitHub**.
-
-Run `umap.py` to generate umap visualization figures.
+Run `./model_train_test/umap_test.py` to generate umap visualization figures. Remember to modify the path of the model to the one that you want to visualize.
 
 ```bash
-$ python model_train_test/umap_test_Y.py
+python model_train_test/umap_test_Y.py
+python model_train_test/umap_test_ST.py
 ```
 
-Run `Generate_tfseq.py` files to generate sequence for Two Sample Logo analysis. 
+Run `./model_train_test/Generate_tfseq.py` files to generate sequence for Two Sample Logo analysis. Remember to modify the path of the model to the one that you want to visualize.
 
 ```bash
-$ python model_train_test/Generate_tfseq_Y.py
+python model_train_test/Generate_tfseq_Y.py
+python model_train_test/Generate_tfseq_ST.py
 ```
 
 

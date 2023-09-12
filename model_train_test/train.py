@@ -14,6 +14,7 @@ import os
 import pretrained_embedding_generate
 from pretrained_embedding_generate import embedding_out
 from torch.optim import *
+from ml_set import *
 torch.backends.cudnn.enabled = True
 torch.backends.cudnn.benchmark=True
 
@@ -122,7 +123,7 @@ def training(fold, model,device,epochs,criterion,optimizer,
             print("best_model_save")
             save_model_test(model.state_dict(), fold, auc, './model/Y_train', parameters.learn_name) 
             # Open the file using "append" mode to add content to it
-            with open("./model/Y_train/save_result.txt", "a") as f:
+            with open("./model/Y_train/save_result.txt", "a") as f:     
                 # Format the content to be written as a string
                 result_str = "save model: epoch {} - iteration {}: average loss {:.3f} val_acc {:.3f} val_auc {:.3f} learning rate {:.2e}\n".format(epoch+1, step+1, running_loss,acc,auc, optimizer.param_groups[0]['lr'])
                 # Write the string to the file
@@ -212,9 +213,14 @@ if __name__ == "__main__":
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     print("Using {}".format(device))
     
-    
-    train = pd.read_csv("data/Y-train.csv",header=0)
-    test = pd.read_csv("data/Y-test.csv",header=0)
+    # ----------------- For S/T dataset ---------------------
+    # train,test = data_read()
+    # ------------------------------------------------------
+
+    # ----------------- For Y dataset ----------------------
+    train,test = data_readY()
+    # ------------------------------------------------------
+
     x_train = train.iloc[:,1]
     x_test = test.iloc[:,1]
     train_label = train.iloc[:,0]
@@ -222,17 +228,23 @@ if __name__ == "__main__":
     
     x_train_encoding = BERT_encoding(x_train,x_test).to('cuda')
     x_test_encoding = BERT_encoding(x_test,x_train).to('cuda')
-    x_train_embedding = torch.tensor(np.load('data/Y_train_embedding.npy')).to('cuda')
-    x_test_embedding = torch.tensor(np.load('data/Y_test_embedding.npy')).to('cuda')
-    x_train_str_embedding = torch.tensor(np.load('data/Y_train_str_embedding.npy')).to('cuda')
-    x_test_str_embedding = torch.tensor(np.load('data/Y_test_str_embedding.npy')).to('cuda')   
-    
+
+    # ----------------- For S/T dataset ---------------------
+    # x_train_embedding,x_test_embeddin = embedding_load()
+    # x_train_str_embedding,x_test_str_embedding = embedding_str_load()
+    # ------------------------------------------------------
+
+    # ----------------- For Y dataset ----------------------
+    x_train_embedding,x_test_embedding = embedding_loadY()
+    x_train_str_embedding,x_test_str_embedding = embedding_str_loadY()
+    # ------------------------------------------------------
+
     train_label = torch.tensor(np.array(train_label,dtype='int64')).to('cuda')
     test_label = torch.tensor(np.array(test_label,dtype='int64')).to('cuda')
     parameters =  config.get_train_config()
     criterion = torch.nn.CrossEntropyLoss()
     
-    print("x_train.shape = ",x_train_encoding.shape)
+    print("train.shape = ",x_train_encoding.shape)
     print("train_label.shape = ",train_label.shape)
     
     torch.manual_seed(142)

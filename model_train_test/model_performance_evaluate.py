@@ -17,7 +17,6 @@ from train import BERT_encoding
 
 from Algorithm_eval_function import LR_eval,LR_L2_eval,Linear_SVM_eval,Kernel_SVM_eval,RF_eval,DL_eval,BERT_eval,preBERT_eval
 import pickle
-import ml_config
 import config
 
 cf = config.get_train_config()
@@ -25,21 +24,21 @@ cf.task = 'test'
 device = torch.device('cpu')
 BERT_model = BERT(cf)
 
-# ----------------- For ST data set ---------------------
-# Uncomment this section if using the ST data set
+# ----------------- For S/T data set ---------------------
 # train,test = data_read()
 # train_seq = train.iloc[:,1]
 # test_seq = test.iloc[:,1]
 # test_label = torch.tensor(np.array(test.iloc[:,0],dtype='int64')).to(device) # Very important
 # train_encoding = BERT_encoding(train_seq,test_seq)
 # test_encoding = BERT_encoding(test_seq,train_seq)
-# test_embedding = torch.tensor(np.load('/root/autodl-tmp/myDNAPredict/program 1.1/data/x_test_embedding.npy')).to(device)
-# test_str_embedding = torch.tensor(np.load('/root/autodl-tmp/myDNAPredict/program 1.1/data/test_str_embedding.npy')).to(device)
+# test_embedding = torch.tensor(np.load('./data/ST_test_embedding.npy')).to(device)
+# test_str_embedding = torch.tensor(np.load('./data/ST_test_str_embedding.npy')).to(device)
+#-------------------Please change the directory path here to fit your model---------------
+# path = './model/ST_train'
 # -------------------------------------------------------
 
 # ----------------- For Y data set ----------------------
-train = pd.read_csv("./data/Y-train.csv",header=0)
-test = pd.read_csv("./data/Y-test.csv",header=0)
+train,test = data_readY()
 train_seq = train.iloc[:,1]
 test_seq = test.iloc[:,1]
 test_label = torch.tensor(np.array(test.iloc[:,0],dtype='int64')).to(device) # Very important
@@ -47,10 +46,9 @@ train_encoding = BERT_encoding(train_seq,test_seq)
 test_encoding = BERT_encoding(test_seq,train_seq)
 test_embedding = torch.tensor(np.load('./data/Y_test_embedding.npy')).to(device)
 test_str_embedding = torch.tensor(np.load('./data/Y_test_str_embedding.npy')).to(device)
+#-------------------Please change the directory path here to fit your model---------------
+path = './model/Y_train'
 # ------------------------------------------------------
-
-# Please modify the file path here!
-path = './model/Y'
 
 # Get all file names in the directory
 files = os.listdir(path)
