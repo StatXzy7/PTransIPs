@@ -25,7 +25,7 @@ PTransIPs: Identification of SARS-CoV-2 phosphorylation sites based on protein p
 
 ### Input1: Sequence
 
-fasta/csv sequence file
+The orginal fasta/csv sequence file already exists in `./data/`.
 
 ### Input2: Sequence pretrained embedding
 
@@ -35,11 +35,13 @@ To generate sequence pretrained embedding, run `./model_train_test/pretrained_em
 python model_train_test/pretrained_embedding_generate.py
 ```
 
+**The code is set to generate embeddings for Y sites as default, if you attempt to do that for S/T sites, you should run the code after commenting Y sites' part and uncommenting S/T sites' part!**
+
 You may also refer to **[ProtTrans](https://github.com/agemagician/ProtTrans)** for detailed explanations.
 
 ### Input3: Structure pretrained embedding
 
-Firstly, git clone the `EMBER2` project. After moving the file `./model_train_test/pretrained_embedding_generate.py` into the `EMBER2` folder, you may run the model to generate structure embeddding:
+To generate structure embeddding, firstly, git clone the `EMBER2` project. After moving the file `./model_train_test/pretrained_embedding_generate.py` into the `EMBER2` folder, you may run the codes: 
 
 ```bash
 git clone https://github.com/kWeissenow/EMBER2.git
@@ -47,7 +49,7 @@ cp model_train_test/structure_embedding_generate.py EMBER2/
 python EMBER2/structure_embedding_generate.py -i "data/Y-train.fa" -o "EMBER2/output"
 python EMBER2/structure_embedding_generate.py -i "data/Y-test.fa" -o "EMBER2/output"
 ```
-**Here, `structure_embedding_generate.py` is set to train Y sites as default, if you attempt to train S/T sites, you may run as follows after modify the codes by commenting Y sites' part and uncommenting S/T sites' part!**
+**Here, `structure_embedding_generate.py` is set to generate embeddings for Y sites as default, if you attempt to do that for S/T sites, you may run as follows after modify the codes by commenting Y sites' part and uncommenting S/T sites' part!**
 
 ```bash
 python EMBER2/structure_embedding_generate.py -i "data/ST-train.fa" -o "EMBER2/output"
