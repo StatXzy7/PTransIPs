@@ -1,4 +1,6 @@
 # PTransIPs
+![](https://img.shields.io/badge/PRs-Welcome-blue)
+![](https://img.shields.io/github/last-commit/StatXzy7/PTransIPs?color=green)
 
 PTransIPs: Identification of SARS-CoV-2 phosphorylation sites based on protein pretrained model embedding and transformer [[Paper]](https://arxiv.org/abs/2308.05115)
 
