@@ -176,7 +176,8 @@ if __name__ == "__main__":
     
     longest = pd.DataFrame([max(data, key = len)]).iloc[:,0]
     print("longest sequence= ", longest)
-    data = data.append(longest).reset_index(drop=True)
+    # data = data.append(longest).reset_index(drop=True)
+    data = pd.concat([data, longest]).reset_index(drop=True)
     
     per_residue = True 
     data = embedding_out(data,data,per_residue)
