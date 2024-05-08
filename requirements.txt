@@ -1,0 +1,5 @@
+pandas
+scikit-learn
+transformers
+matplotlib
+umap-learn
