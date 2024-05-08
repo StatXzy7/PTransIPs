@@ -151,10 +151,7 @@ class BERT(nn.Module):
         d_k = config.dim_k
         d_v = config.dim_v
         vocab_size = config.vocab_size
-        if config.task == 'test':
-            device = torch.device("cpu")
-        else:
-            device = torch.device("cuda" if config.cuda else "cpu")
+        device = torch.device(config.device if torch.cuda.is_available() else 'cpu')
 
         self.transformer_layers = nn.ModuleList([
             nn.TransformerEncoderLayer(d_model , config.num_head , config.dim_feedforward , dropout = 0.1)

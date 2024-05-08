@@ -3,8 +3,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
 import pandas as pd
-import config
 import PTransIPs_model
+import argparse
 from sklearn.model_selection import KFold, StratifiedShuffleSplit, StratifiedKFold
 import collections
 from torch.utils.data import  DataLoader, TensorDataset
@@ -92,7 +92,7 @@ def save_model_test(model_dict, fold, auc, save_dir, save_prefix):
 
 def training(fold, model,device,epochs,criterion,optimizer,
              traindata,
-             val,val_embedding,val_str_embedding, val_labels, scheduler):
+             val,val_embedding,val_str_embedding, val_labels, scheduler, **kwargs):
     
     running_loss = 0
     max_performance = 0
@@ -106,8 +106,10 @@ def training(fold, model,device,epochs,criterion,optimizer,
             ReduceLR = True
         for step, (inputs,embedding, str_embedding, labels) in enumerate(traindata):
             # print ("inputs.shape=",inputs.shape)
-            inputs = inputs.to(device)
-            labels = labels.to(device)
+            inputs = inputs.to(device, non_blocking=True)
+            labels = labels.to(device, non_blocking=True)
+            embedding = embedding.to(device, non_blocking=True)
+            str_embedding = str_embedding.to(device, non_blocking=True)
             model = model.to(device)
             outputs,_ = model(inputs, embedding, str_embedding)
             loss = get_val_loss(outputs,labels,criterion)
@@ -121,13 +123,21 @@ def training(fold, model,device,epochs,criterion,optimizer,
         auc =  roc_auc_score(val_labels.cpu().detach().numpy(), val_result[:,1].cpu().detach().numpy()) 
         if auc - max_performance > 1e-4 and epoch > 50 :
             print("best_model_save")
-            save_model_test(model.state_dict(), fold, auc, './model/Y_train', parameters.learn_name) 
-            # Open the file using "append" mode to add content to it
-            with open("./model/Y_train/save_result.txt", "a") as f:     
-                # Format the content to be written as a string
-                result_str = "save model: epoch {} - iteration {}: average loss {:.3f} val_acc {:.3f} val_auc {:.3f} learning rate {:.2e}\n".format(epoch+1, step+1, running_loss,acc,auc, optimizer.param_groups[0]['lr'])
-                # Write the string to the file
-                f.write(result_str)
+            if args.Y:
+                save_model_test(model.state_dict(), fold, auc, './model/Y_train', parameters.learn_name) 
+                # Open the file using "append" mode to add content to it
+                with open("./model/Y_train/save_result.txt", "a") as f:     
+                    # Format the content to be written as a string
+                    result_str = "save model: epoch {} - iteration {}: average loss {:.3f} val_acc {:.3f} val_auc {:.3f} learning rate {:.2e}\n".format(epoch+1, step+1, running_loss,acc,auc, optimizer.param_groups[0]['lr'])
+                    # Write the string to the file
+                    f.write(result_str)
+            elif args.ST:
+                save_model_test(model.state_dict(), fold, auc, './model/ST_train', parameters.learn_name) 
+                with open("./model/ST_train/save_result.txt", "a") as f:     
+                    # Format the content to be written as a string
+                    result_str = "save model: epoch {} - iteration {}: average loss {:.3f} val_acc {:.3f} val_auc {:.3f} learning rate {:.2e}\n".format(epoch+1, step+1, running_loss,acc,auc, optimizer.param_groups[0]['lr'])
+                    # Write the string to the file
+                    f.write(result_str)
             print(result_str, "\n")
             max_performance = auc
             # if epoch >= warmup_steps:
@@ -149,16 +159,16 @@ def train_validation(parameters,
         model = PTransIPs_model.BERT(parameters).to(device)
         
         print('**'*10,'Fold', fold+1, 'Processing...', '**'*10)
-        x_train = x_train_encoding[train_idx]
-        x_train_label = train_label[train_idx]
-        x_val = x_train_encoding[val_idx]
-        x_val_label = train_label[val_idx]
+        x_train = x_train_encoding[train_idx].to(device, non_blocking=True)
+        x_train_label = train_label[train_idx].to(device, non_blocking=True)
+        x_val = x_train_encoding[val_idx].to(device, non_blocking=True)
+        x_val_label = train_label[val_idx].to(device, non_blocking=True)
         x_val_label.index = range(len(x_val_label))
         
-        embedding = x_train_embedding[train_idx]
-        x_val_embedding = x_train_embedding[val_idx]
-        str_embedding = x_train_str_embedding[train_idx]
-        x_val_str_embedding = x_train_str_embedding[val_idx]
+        embedding = x_train_embedding[train_idx].to(device, non_blocking=True)
+        x_val_embedding = x_train_embedding[val_idx].to(device, non_blocking=True)
+        str_embedding = x_train_str_embedding[train_idx].to(device, non_blocking=True)
+        x_val_str_embedding = x_train_str_embedding[val_idx].to(device, non_blocking=True)
         
         train_data_loader = addbatcht(x_train,embedding,str_embedding, x_train_label,batchsize)
         
@@ -168,7 +178,7 @@ def train_validation(parameters,
         # scheduler = StepLR(optimizer, step_size=5, gamma=0.1)
         training(fold,model,device,epochs,criterion,optimizer,
                  train_data_loader,
-                 x_val,x_val_embedding,x_val_str_embedding, x_val_label, warmup_scheduler)    
+                 x_val,x_val_embedding,x_val_str_embedding, x_val_label, warmup_scheduler,args=parameters)    
         
 
 def BERT_encoding(txt_array,test_array):
@@ -210,37 +220,71 @@ class WarmupScheduler(lr_scheduler._LRScheduler):
 
 
 if __name__ == "__main__":
-    device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
-    print("Using {}".format(device))
+    # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    # print("Using {}".format(device))
     
-    # ----------------- For S/T dataset ---------------------
+    # # ----------------- For S/T dataset ---------------------
     # train,test = data_read()
-    # ------------------------------------------------------
+    # # ------------------------------------------------------
 
-    # ----------------- For Y dataset ----------------------
-    train,test = data_readY()
-    # ------------------------------------------------------
+    # # ----------------- For Y dataset ----------------------
+    # # train,test = data_readY()
+    # # ------------------------------------------------------
 
-    x_train = train.iloc[:,1]
-    x_test = test.iloc[:,1]
-    train_label = train.iloc[:,0]
-    test_label = test.iloc[:,0]
+    # x_train = train.iloc[:,1]
+    # x_test = test.iloc[:,1]
+    # train_label = train.iloc[:,0]
+    # test_label = test.iloc[:,0]
     
-    x_train_encoding = BERT_encoding(x_train,x_test).to('cuda')
-    x_test_encoding = BERT_encoding(x_test,x_train).to('cuda')
+    # x_train_encoding = BERT_encoding(x_train,x_test).to('cuda')
+    # x_test_encoding = BERT_encoding(x_test,x_train).to('cuda')
 
-    # ----------------- For S/T dataset ---------------------
+    # # ----------------- For S/T dataset ---------------------
     # x_train_embedding,x_test_embeddin = embedding_load()
     # x_train_str_embedding,x_test_str_embedding = embedding_str_load()
-    # ------------------------------------------------------
+    # # ------------------------------------------------------
 
-    # ----------------- For Y dataset ----------------------
-    x_train_embedding,x_test_embedding = embedding_loadY()
-    x_train_str_embedding,x_test_str_embedding = embedding_str_loadY()
-    # ------------------------------------------------------
+    # # ----------------- For Y dataset ----------------------
+    # # x_train_embedding,x_test_embedding = embedding_loadY()
+    # # x_train_str_embedding,x_test_str_embedding = embedding_str_loadY()
+    # # ------------------------------------------------------
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--Y', action='store_true', help='Select the Y dataset')
+    parser.add_argument('--ST', action='store_true', help='Select the ST dataset')
+    parser.add_argument('--device', type=int, default=0, choices=list(range(torch.cuda.device_count())), help='ordinal number of the GPU to use for computation')
+    args = parser.parse_args()
 
-    train_label = torch.tensor(np.array(train_label,dtype='int64')).to('cuda')
-    test_label = torch.tensor(np.array(test_label,dtype='int64')).to('cuda')
+    device = torch.device(args.device if torch.cuda.is_available() else 'cpu')
+    print("Using {}".format(device))
+
+    if args.ST:
+        train, test = data_read()
+        x_train, x_test = train.iloc[:, 1], test.iloc[:, 1]
+        train_label, test_label = train.iloc[:, 0], test.iloc[:, 0]
+
+        x_train_encoding = BERT_encoding(x_train, x_test).to(device)
+        x_test_encoding = BERT_encoding(x_test, x_train).to(device)
+
+        x_train_embedding, x_test_embedding = embedding_load()
+        x_train_str_embedding, x_test_str_embedding = embedding_str_load()
+
+    elif args.Y:
+        train, test = data_readY()
+        x_train, x_test = train.iloc[:, 1], test.iloc[:, 1]
+        train_label, test_label = train.iloc[:, 0], test.iloc[:, 0]
+
+        x_train_encoding = BERT_encoding(x_train, x_test).to(device)
+        x_test_encoding = BERT_encoding(x_test, x_train).to(device)
+
+        x_train_embedding, x_test_embedding = embedding_loadY()
+        x_train_str_embedding, x_test_str_embedding = embedding_str_loadY()
+    else:
+        raise ValueError("Please select a dataset to train on")
+
+
+    train_label = torch.tensor(np.array(train_label,dtype='int64')).to(device)
+    test_label = torch.tensor(np.array(test_label,dtype='int64')).to(device)
+    import config
     parameters =  config.get_train_config()
     criterion = torch.nn.CrossEntropyLoss()
     
@@ -249,11 +293,8 @@ if __name__ == "__main__":
     
     torch.manual_seed(142)
     traindata = addbatch(x_train_encoding,train_label,18)
-    device = 'cuda'
     warmup_steps = 5
     train_validation(parameters,
                      x_train_encoding,x_train_embedding,x_train_str_embedding,train_label,
                      device,100,criterion,5,1e-4,15) #New Hyperparameter
-    # train_validation(parameters,x_train_encoding,train_label,device,50,criterion,10,0.0001,64)
-    #training(model,device,100,criterion,optimizer,traindata,x_test_encoding,test_label)
     

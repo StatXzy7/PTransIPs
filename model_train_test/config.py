@@ -1,12 +1,16 @@
 # ---encoding:utf-8---
 
 import argparse
+import torch
 
 
 def get_train_config():
     parse = argparse.ArgumentParser(description='iDNA_ABT train model')
 
     # preoject setting
+    parse.add_argument('--Y', action='store_true', help='Select the Y dataset')
+    parse.add_argument('--ST', action='store_true', help='Select the ST dataset')
+    parse.add_argument('--device', type=int, default=0, choices=list(range(torch.cuda.device_count())),help='ordinal number of the GPU to use for computation')
     parse.add_argument('-learn-name', type=str, default='BERT_validation', help='learn name')
     parse.add_argument('-save-best', type=bool, default=True, help='if save parameters of the current best model ')
     parse.add_argument('-threshold', type=float, default=0.8, help='save threshold')
@@ -34,7 +38,7 @@ def get_train_config():
     parse.add_argument('-num-class', type=int, default=2, help='number of classes')
     # parse.add_argument('-cuda', type=bool, default=True, help='if use cuda')
     parse.add_argument('-cuda', type=bool, default=True, help='if not use cuda')
-    parse.add_argument('-device', type=int, default='0', help='device id')
+    # parse.add_argument('-device', type=int, default='0', help='device id')
     parse.add_argument('-interval-log', type=int, default=5,
                        help='how many batches have gone through to record the training performance')
     parse.add_argument('-interval-valid', type=int, default=1,
