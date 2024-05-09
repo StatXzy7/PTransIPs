@@ -1,1 +1,7 @@
 EMBER2/
+embedding/
+figures/umap_pdf/
+model/
+model_train_test/__pycache__/
+model/Y_train/save_result.txt
+.vscode/launch.json

@@ -220,34 +220,6 @@ class WarmupScheduler(lr_scheduler._LRScheduler):
 
 
 if __name__ == "__main__":
-    # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    # print("Using {}".format(device))
-    
-    # # ----------------- For S/T dataset ---------------------
-    # train,test = data_read()
-    # # ------------------------------------------------------
-
-    # # ----------------- For Y dataset ----------------------
-    # # train,test = data_readY()
-    # # ------------------------------------------------------
-
-    # x_train = train.iloc[:,1]
-    # x_test = test.iloc[:,1]
-    # train_label = train.iloc[:,0]
-    # test_label = test.iloc[:,0]
-    
-    # x_train_encoding = BERT_encoding(x_train,x_test).to('cuda')
-    # x_test_encoding = BERT_encoding(x_test,x_train).to('cuda')
-
-    # # ----------------- For S/T dataset ---------------------
-    # x_train_embedding,x_test_embeddin = embedding_load()
-    # x_train_str_embedding,x_test_str_embedding = embedding_str_load()
-    # # ------------------------------------------------------
-
-    # # ----------------- For Y dataset ----------------------
-    # # x_train_embedding,x_test_embedding = embedding_loadY()
-    # # x_train_str_embedding,x_test_str_embedding = embedding_str_loadY()
-    # # ------------------------------------------------------
     parser = argparse.ArgumentParser()
     parser.add_argument('--Y', action='store_true', help='Select the Y dataset')
     parser.add_argument('--ST', action='store_true', help='Select the ST dataset')
@@ -295,6 +267,14 @@ if __name__ == "__main__":
     traindata = addbatch(x_train_encoding,train_label,18)
     warmup_steps = 5
     train_validation(parameters,
-                     x_train_encoding,x_train_embedding,x_train_str_embedding,train_label,
-                     device,100,criterion,5,1e-4,15) #New Hyperparameter
+                     x_train_encoding,
+                     x_train_embedding,
+                     x_train_str_embedding,
+                     train_label,
+                     device,
+                     100,
+                     criterion,
+                     5,
+                     1e-4,
+                     15) 
     

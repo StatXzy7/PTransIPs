@@ -42,7 +42,7 @@ test_str_embedding = torch.tensor(np.load('./embedding/Y_test_str_embedding.npy'
 
 path = './model/Y'
 #-------------------Please change the file path here to fit your model---------------
-pt_file = './model/Y/Y_model.pt'
+pt_file = './model/Y_train/fold0_BERT_model.pt'
 
 print("model loading......")
 BERT_model.load_state_dict(torch.load(pt_file))

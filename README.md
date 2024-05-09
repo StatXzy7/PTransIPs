@@ -12,15 +12,31 @@ PTransIPs: Identification of SARS-CoV-2 phosphorylation sites based on protein p
 
 ## Table of Contents
 
-- [Step1: Generate two pretrained embedding](#step1-generate-two-pretrained-embedding)
+- [1. Steup](#1-setup)
+- [2. Generate two pretrained embedding](#2-generate-two-pretrained-embedding)
     * [Input1: Sequence](#input1-sequence)
     * [Input2: Sequence pretrained embedding](#input2-sequence-pretrained-embedding)
     * [Input3: Structure pretrained embedding](#input3-structure-pretrained-embedding)
-- [Step2: Training PTransIPs Model](#step2-training-ptransips-model)
-- [Step3: Evaluate the model performance on independent testset](#step3-evaluate-the-model-performance-on-independent-testset)
-- [Step4: Other Visual analysis](#step4-other-visual-analysis)
+- [3. Training PTransIPs Model](#3-training-ptransips-model)
+- [4. Evaluate the model performance on independent testset](#4-evaluate-the-model-performance-on-independent-testset)
+- [5. Some Visualization Analysis](#5-some-visualization-analysis)
 
-## Step1: Generate two pretrained embedding
+## 1. Setup
+
+#### 🔧Pip Installation
+
+**Note: We recommend use Python 3.9 for PTransIPs, and use conda to manage your environments!**
+
+To get started, simply install conda and run:
+
+```shell
+git clone https://github.com/StatXzy7/PTransIPs.git
+conda create --name PTransIPs python==3.9
+...
+pip install -r requirements.txt
+```
+
+## 2. Generate two pretrained embedding
 
 (**For ones that wish to skip this step:** We have already uploaded complete embeddings for Y sites in the data folder `./embedding/`. For S/T sites, you may download complete embeddings from [**All PTransIPs pretrained embeddings**](https://1drv.ms/f/s!AqzWnkSOWHpvhxMUDCjM9KFpz50O?e=N23jEn) and place them under the directory`./embedding/`)
 
@@ -62,21 +78,26 @@ You may also refer to **[EMBER2](https://github.com/kWeissenow/EMBER2)** for det
 
 
 
-## Step2: Training PTransIPs Model
+## 3. Training PTransIPs Model
 
 (**For ones that wish to skip this step:** you may [**Download the PTransIPs model**](https://1drv.ms/f/s!AqzWnkSOWHpvhxMUDCjM9KFpz50O?e=N23jEn) directly. Remember to place them under `.\model\Y_train` or `.\model\ST_train` so that you can proceed to the evaluation step directly.)
 
-Run `./model_train_test/train.py` to train the PTransIPs model in `./model_train_test/PTransIPs_model.py`:
+Run `./model_train_test/train.py` to train the PTransIPs model in `./model_train_test/PTransIPs_model.py`.
 
-(**Note that `train.py` is set to train Y sites as default, if you attempt to train S/T sites, you'll have to modify the codes by commenting Y sites' part and uncommenting S/T sites' part!**)
+Important parameters are:
+1. ``--Y``: To specify train the model on Y sites.
+2. ``--ST``: To specify train the model on ST sites.
+3. ``--device``: To specify which GPU to train the model on. (input an integer to specify, default is ``cuda:0``)
+
+Example: Train PTransIPs on ST sites with default GPU:
 
 ```bash
-python model_train_test/train.py
+python model_train_test/train.py --ST
 ```
 
 
 
-## Step3: Evaluate the model performance on independent testset
+## 4. Evaluate the model performance on independent testset
 
 Run `./model_train_test/model_performance _evaluate.py` to evaluate the model performance on independent testset.
 
@@ -90,7 +111,7 @@ Files `path/PTransIPs_test_prob.npy` and `path/PTransIPs_text_result.txt` will b
 
 
 
-## Step4: Other Visual analysis
+## 5. Some Visualization Analysis
 
 **You can see the results directly in the files uploaded, in the directory `figures/umap_pdf`**.
 
@@ -108,5 +129,17 @@ python model_train_test/Generate_tfseq_Y.py
 python model_train_test/Generate_tfseq_ST.py
 ```
 
-
-
+## Citation
+Please feel free to email us at `ziyangxu0205@gmail.com` or `haitian.zhong@cripac.ia.ac.cn`. If you find this work useful in your own research, please consider citing our work. 
+```bibtex
+@ARTICLE{xu2024ptransips,
+  author={Xu, Ziyang and Zhong, Haitian and He, Bingrui and Wang, Xueying and Lu, Tianchi},
+  journal={IEEE Journal of Biomedical and Health Informatics}, 
+  title={PTransIPs: Identification of Phosphorylation Sites Enhanced by Protein PLM Embeddings}, 
+  year={2024},
+  volume={},
+  number={},
+  pages={1-10},
+  keywords={Proteins;Protein engineering;Amino acids;Training;Biological system modeling;Data models;Vectors;Phosphorylation sites;protein pre-trained language model;CNN;Transformer},
+  doi={10.1109/JBHI.2024.3377362}}
+```
