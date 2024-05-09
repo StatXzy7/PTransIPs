@@ -11,6 +11,7 @@ def get_train_config():
     parse.add_argument('--Y', action='store_true', help='Select the Y dataset')
     parse.add_argument('--ST', action='store_true', help='Select the ST dataset')
     parse.add_argument('--device', type=int, default=0, choices=list(range(torch.cuda.device_count())),help='ordinal number of the GPU to use for computation')
+    parse.add_argument('--path', type=str, default=None, help='specify the path for the model to evaluate')
     parse.add_argument('-learn-name', type=str, default='BERT_validation', help='learn name')
     parse.add_argument('-save-best', type=bool, default=True, help='if save parameters of the current best model ')
     parse.add_argument('-threshold', type=float, default=0.8, help='save threshold')

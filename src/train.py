@@ -110,7 +110,7 @@ def training(fold, model,device,epochs,criterion,optimizer,
             labels = labels.to(device, non_blocking=True)
             embedding = embedding.to(device, non_blocking=True)
             str_embedding = str_embedding.to(device, non_blocking=True)
-            model = model.to(device)
+            model = model.to(device, non_blocking=True)
             outputs,_ = model(inputs, embedding, str_embedding)
             loss = get_val_loss(outputs,labels,criterion)
             optimizer.zero_grad()
@@ -156,7 +156,7 @@ def train_validation(parameters,
     # skf = KFold(n_splits=k_fold,shuffle=True,random_state=15)
     skf = StratifiedShuffleSplit(n_splits=k_fold,random_state=42)
     for fold, (train_idx, val_idx) in enumerate(skf.split(x_train_encoding,train_label.cpu())):
-        model = PTransIPs_model.BERT(parameters).to(device)
+        model = PTransIPs_model.BERT(parameters).to(device, non_blocking=True)
         
         print('**'*10,'Fold', fold+1, 'Processing...', '**'*10)
         x_train = x_train_encoding[train_idx].to(device, non_blocking=True)
@@ -234,8 +234,8 @@ if __name__ == "__main__":
         x_train, x_test = train.iloc[:, 1], test.iloc[:, 1]
         train_label, test_label = train.iloc[:, 0], test.iloc[:, 0]
 
-        x_train_encoding = BERT_encoding(x_train, x_test).to(device)
-        x_test_encoding = BERT_encoding(x_test, x_train).to(device)
+        x_train_encoding = BERT_encoding(x_train, x_test).to(device, non_blocking=True)
+        x_test_encoding = BERT_encoding(x_test, x_train).to(device, non_blocking=True)
 
         x_train_embedding, x_test_embedding = embedding_load()
         x_train_str_embedding, x_test_str_embedding = embedding_str_load()
@@ -245,8 +245,8 @@ if __name__ == "__main__":
         x_train, x_test = train.iloc[:, 1], test.iloc[:, 1]
         train_label, test_label = train.iloc[:, 0], test.iloc[:, 0]
 
-        x_train_encoding = BERT_encoding(x_train, x_test).to(device)
-        x_test_encoding = BERT_encoding(x_test, x_train).to(device)
+        x_train_encoding = BERT_encoding(x_train, x_test).to(device, non_blocking=True)
+        x_test_encoding = BERT_encoding(x_test, x_train).to(device, non_blocking=True)
 
         x_train_embedding, x_test_embedding = embedding_loadY()
         x_train_str_embedding, x_test_str_embedding = embedding_str_loadY()
@@ -254,8 +254,8 @@ if __name__ == "__main__":
         raise ValueError("Please select a dataset to train on")
 
 
-    train_label = torch.tensor(np.array(train_label,dtype='int64')).to(device)
-    test_label = torch.tensor(np.array(test_label,dtype='int64')).to(device)
+    train_label = torch.tensor(np.array(train_label,dtype='int64')).to(device, non_blocking=True)
+    test_label = torch.tensor(np.array(test_label,dtype='int64')).to(device, non_blocking=True)
     import config
     parameters =  config.get_train_config()
     criterion = torch.nn.CrossEntropyLoss()
