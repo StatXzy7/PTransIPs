@@ -1,5 +1,6 @@
 EMBER2/
 embedding/
+figures/umap_pdf/
 model/
 src/__pycache__/
 model/Y_train/save_result.txt
